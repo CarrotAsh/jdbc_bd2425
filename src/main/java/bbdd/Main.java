@@ -27,6 +27,7 @@ public class Main {
         // 1. Añade los planetas a la base de datos
         // 2. Muestra por pantalla la lista de pasajeros de la cabina A-60-S
         // 3. Muestra por pantalla una lista de sistemas, planetas y número de pasajeros con origen en ellos
+        // ASH es muy casina
         
         conn.close();
     }
