@@ -11,7 +11,7 @@ public class Main {
 
     // @TODO Sistituye xxx por los parámetros de tu conexión
     private final static String DB_SERVER = null;
-    private final static int DB_PORT = 3;
+    private final static int DB_PORT = 0;
     private final static String DB_NAME = null;
     private final static String DB_USER = null;
     private final static String DB_PASS = null;
