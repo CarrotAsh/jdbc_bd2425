@@ -10,19 +10,20 @@ import java.sql.SQLException;
 public class Main {
 
     // @TODO Sistituye xxx por los parámetros de tu conexión
-    private final static String DB_SERVER = null;
-    private final static int DB_PORT = 0;
-    private final static String DB_NAME = null;
-    private final static String DB_USER = null;
-    private final static String DB_PASS = null;
+    private final static String DB_SERVER = "localhost";
+    private final static int DB_PORT = 3306;
+    private final static String DB_NAME = "titanic_spaceship";
+    private final static String DB_USER = "root";
+    private final static String DB_PASS = "";
     private static Connection conn;
 
-    public static void main (String [] args) throws Exception {
+    public static void main(String[] args) throws Exception {
+
         Class.forName("com.mysql.cj.jdbc.Driver");
 
         String url = "jdbc:mysql://" + DB_SERVER + ":" + DB_PORT + "/" + DB_NAME;
         conn = DriverManager.getConnection(url, DB_USER, DB_PASS);
-    
+
         // @TODO Prueba sus funciones
         // 1. Añade los planetas a la base de datos
         nuevoPlaneta("Kepler-186f", 3.3e24, 8800, "Copernico");
@@ -30,13 +31,12 @@ public class Main {
         nuevoPlaneta("LHS 1140 b", 8.3e24, 8800, "Copernico");
         // 2. Muestra por pantalla la lista de pasajeros de la cabina A-60-S
         // 3. Muestra por pantalla una lista de sistemas, planetas y número de pasajeros con origen en ellos
-        // ASH es muy casina
-        // Pero mucho
 
-
-        
         conn.close();
+
+
     }
+
 
     private static void nuevoPlaneta (String nombre, Double masa, Integer radio, String sistema) throws SQLException {
         // @TODO Añade planetas a la base de datos
@@ -79,3 +79,4 @@ public class Main {
 
     }
 }
+
