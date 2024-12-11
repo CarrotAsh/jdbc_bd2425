@@ -32,7 +32,9 @@ public class Main {
         nuevoPlaneta("HD 209458 b", 1.4e27, 100000, "Beta Pictoris");
         nuevoPlaneta("LHS 1140 b", 8.3e24, 8800, "Copernico");
         // 2. Muestra por pantalla la lista de pasajeros de la cabina A-60-S
+        listaPasajerosCabina("A",60,"S");
         // 3. Muestra por pantalla una lista de sistemas, planetas y número de pasajeros con origen en ellos
+
 
         conn.close();
 
@@ -79,6 +81,30 @@ public class Main {
 
     private static void listaPasajerosCabina (String cubierta, int cabina, String lado) throws SQLException {
         // @TODO Muestra por pantalla una lista de pasajeros de una cabina
+
+        try {
+            // Consulta SQL para obtener pasajeros de una cabina específica
+            PreparedStatement stmt = conn.prepareStatement("SELECT p.nombre, p.edad \n" +
+                    "FROM pasajeros p\n" +
+                    "WHERE numero_cabina = '60' AND lado_cabina = 'S' AND cubierta = 'A'");
+
+            // Asignar los valores de los parámetros
+            stmt.setString(1, cubierta);
+            stmt.setInt(2, cabina);
+            stmt.setString(3, lado);
+
+            // Ejecutar la consulta
+            ResultSet rs = stmt.executeQuery();
+
+            // Mostrar los resultados
+
+
+
+
+        } catch (SQLException ex) {
+            System.err.println("Error al obtener la lista de pasajeros: " + ex.getMessage());
+        }
+
         
     }
 
