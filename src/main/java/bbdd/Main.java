@@ -19,6 +19,8 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
+        //Ejercicios
+
         Class.forName("com.mysql.cj.jdbc.Driver");
 
         String url = "jdbc:mysql://" + DB_SERVER + ":" + DB_PORT + "/" + DB_NAME;
@@ -38,17 +40,17 @@ public class Main {
     }
 
 
-    private static void nuevoPlaneta (String nombre, Double masa, Integer radio, String sistema) throws SQLException {
+    private static void nuevoPlaneta (String nombre, double masa, int radio, String sistema) throws SQLException {
         // @TODO Añade planetas a la base de datos
         try{
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO planetas (nombre, masa, radio, sistema) VALUES (?,?,?,?)");
             stmt.setString(1, nombre);
-            if (masa == null) {
+            if (Double.isNaN(masa)) { //Double.isNaN()
                 stmt.setNull(2, java.sql.Types.DECIMAL); // Si masa es nulo, insertar NULL (si no se hace asi salta nullPointerException)
             } else {
                 stmt.setDouble(2, masa); // Si no, insertar el valor de masa
             }
-            if (radio == null) {
+            if (radio < 0) {
                 stmt.setNull(3, java.sql.Types.DECIMAL);  // lo mismo que pasaba con la masa
             } else {
                 stmt.setInt(3, radio);  //
@@ -57,6 +59,7 @@ public class Main {
             stmt.executeUpdate();
             System.out.println("Creado el planeta \""+ nombre + "\"");
         } catch(SQLException ex){
+
             if (ex.getMessage().contains("Duplicate entry"))
                 System.out.println("Ya existe el planeta en la BBDD. No es necesario crearlo");
             else
@@ -64,6 +67,11 @@ public class Main {
                 System.out.println(ex);
                 System.exit(1);
             }
+
+
+            System.out.println(ex);
+            System.exit(1);
+
         }
 
 
