@@ -110,7 +110,6 @@ public class Main {
             }
 
 
-
         } catch (SQLException ex) {
             System.err.println("Error al obtener la lista de pasajeros: " + ex.getMessage());
         } finally {
