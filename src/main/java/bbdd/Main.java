@@ -1,11 +1,6 @@
 package bbdd;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class Main {
 
@@ -28,14 +23,16 @@ public class Main {
 
         // @TODO Prueba sus funciones
         // 1. Añade los planetas a la base de datos
-        /*
-        nuevoPlaneta("Kepler-186f", 3.3e24, 8800, "Copernico");
-        nuevoPlaneta("HD 209458 b", 1.4e27, 100000, "Beta Pictoris");
-        nuevoPlaneta("LHS 1140 b", 8.3e24, 8800, "Copernico");
-        */
+
+        //nuevoPlaneta("Kepler-186f", 3.3e24, 8800, "Copernico");
+        //nuevoPlaneta("HD 209458 b", 1.4e27, 100000, "Beta Pictoris");
+        //nuevoPlaneta("LHS 1140 b", 8.3e24, 8800, "Copernico");
+
         // 2. Muestra por pantalla la lista de pasajeros de la cabina A-60-S
         listaPasajerosCabina("A",60,"S");
         // 3. Muestra por pantalla una lista de sistemas, planetas y número de pasajeros con origen en ellos
+
+        listaOrigenes();
 
 
         conn.close();
@@ -80,15 +77,13 @@ public class Main {
 
         }
 
-
-
     }
 
     private static void listaPasajerosCabina (String cubierta, int cabina, String lado) throws SQLException {
         // @TODO Muestra por pantalla una lista de pasajeros de una cabina
 
-        ResultSet rs = null;
         PreparedStatement stmt = null;
+        ResultSet rs = null;
 
         try {
             // Consulta SQL para obtener pasajeros de una cabina específica
@@ -128,6 +123,121 @@ public class Main {
     private static void listaOrigenes() throws SQLException {
         // @TODO Muestra por pantalla una lista de planetas, sistemas y número de pasajeros provinientes de ellos
 
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            stmt = conn.prepareStatement(
+                    "SELECT " +
+                            "    pl.sistema, " +
+                            "    pl.nombre AS planeta, " +
+                            "    COUNT(p.id) AS pasajeros " +
+                            "FROM " +
+                            "    planetas pl " +
+                            "LEFT JOIN " +
+                            "    pasajeros p ON p.planeta_natal = pl.nombre AND p.sistema_natal = pl.sistema " +
+                            "GROUP BY " +
+                            "    pl.sistema, " +
+                            "    pl.nombre;");
+
+            rs = stmt.executeQuery();
+
+
+            while (rs.next()) {
+                String sistema = rs.getString("sistema");
+                String planeta = rs.getString("planeta");
+                int pasajeros = rs.getInt("pasajeros");
+                System.out.println("Sistema = " + sistema + "; planeta = " + planeta + "; Num-Pasajeros = " + pasajeros );
+            }
+
+        } catch (SQLException ex) {
+            System.err.println("Error al obtener la lista de origenes: " + ex.getMessage());
+        }finally {
+            if(stmt != null){
+                stmt.close();
+            }
+            if(rs != null){
+                rs.close();
+            }
+        }
+
     }
 }
+
+
+/*
+
+private static void listaPasajerosCabina (String cubierta, int cabina, String lado) throws SQLException {
+        // @TODO Muestra por pantalla una lista de pasajeros de una cabina
+        List<pasajero> lista= new ArrayList<>();
+        PreparedStatement stmt;
+        stmt = conn.prepareStatement("SELECT p.nombre, p.edad " + "FROM pasajeros p " + "WHERE numero_cabina = ? AND lado_cabina = ? AND cubierta = ?");
+        stmt.setInt(1, cabina);
+        stmt.setString(2, lado);
+        stmt.setString(3, cubierta);
+        ResultSet rs = stmt.executeQuery();
+
+        while(rs.next()){
+
+            lista.add(new Pasajero(rs.getString("nombre"), rs.getInt("edad")));
+            //lista.add(rs.getPasajero());
+        }
+        rs.close();
+        System.out.println("------lista de pasajeros------");
+        for(Pasajero i: lista) {
+            System.out.println("Nombre:" + " " + i.getName()+" "+"Edad:" + " "+ i.getEdad());
+        }
+        System.out.println();
+
+}
+
+
+private static void listaOrigenes() throws SQLException {
+    // @TODO Muestra por pantalla una lista de planetas, sistemas y número de pasajeros provinientes de ellos
+    List<Origenes> lista = new ArrayList<>();
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+
+    try {
+        stmt = conn.prepareStatement(
+                "SELECT " +
+                        "    pl.sistema, " +
+                        "    pl.nombre AS planeta, " +
+                        "    COUNT(p.id) AS pasajeros " +
+                        "FROM " +
+                        "    planetas pl " +
+                        "LEFT JOIN " +
+                        "    pasajeros p ON p.planeta_natal = pl.nombre AND p.sistema_natal = pl.sistema " +
+                        "GROUP BY " +
+                        "    pl.sistema, " +
+                        "    pl.nombre;");
+
+        rs = stmt.executeQuery();
+
+        while (rs.next()) {
+            lista.add(new Origenes(rs.getString("sistema"), rs.getString("planeta"), rs.getInt("pasajeros")));
+        }
+
+        for (Origenes i : lista) {
+            System.out.println("Sistema: " + i.getSistema() + ", Planeta: " + i.getPlaneta() + ", Pasajeros: " + i.getPasajeros());
+        }
+
+        System.out.println();
+
+    } catch (SQLException ex) {
+        System.err.println("Error al obtener la lista de origenes: " + ex.getMessage());
+    } finally {
+        if (stmt != null) {
+            stmt.close();
+        }
+        if (rs != null) {
+            rs.close();
+        }
+    }
+}
+
+
+
+
+ */
 
