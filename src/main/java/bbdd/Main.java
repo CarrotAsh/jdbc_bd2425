@@ -28,9 +28,11 @@ public class Main {
 
         // @TODO Prueba sus funciones
         // 1. Añade los planetas a la base de datos
+        /*
         nuevoPlaneta("Kepler-186f", 3.3e24, 8800, "Copernico");
         nuevoPlaneta("HD 209458 b", 1.4e27, 100000, "Beta Pictoris");
         nuevoPlaneta("LHS 1140 b", 8.3e24, 8800, "Copernico");
+        */
         // 2. Muestra por pantalla la lista de pasajeros de la cabina A-60-S
         listaPasajerosCabina("A",60,"S");
         // 3. Muestra por pantalla una lista de sistemas, planetas y número de pasajeros con origen en ellos
@@ -60,6 +62,9 @@ public class Main {
             stmt.setString(4,sistema);
             stmt.executeUpdate();
             System.out.println("Creado el planeta \""+ nombre + "\"");
+
+            stmt.close();
+
         } catch(SQLException ex){
 
             if (ex.getMessage().contains("Duplicate entry"))
@@ -70,11 +75,11 @@ public class Main {
                 System.exit(1);
             }
 
-
             System.out.println(ex);
             System.exit(1);
 
         }
+
 
 
     }
@@ -82,27 +87,41 @@ public class Main {
     private static void listaPasajerosCabina (String cubierta, int cabina, String lado) throws SQLException {
         // @TODO Muestra por pantalla una lista de pasajeros de una cabina
 
+        ResultSet rs = null;
+        PreparedStatement stmt = null;
+
         try {
             // Consulta SQL para obtener pasajeros de una cabina específica
-            PreparedStatement stmt = conn.prepareStatement("SELECT p.nombre, p.edad \n" +
-                    "FROM pasajeros p\n" +
-                    "WHERE numero_cabina = '60' AND lado_cabina = 'S' AND cubierta = 'A'");
+            stmt = conn.prepareStatement("SELECT p.nombre, p.edad " +
+                    "FROM pasajeros p " +
+                    "WHERE numero_cabina = ? AND lado_cabina = ? AND cubierta = ?");
 
-            // Asignar los valores de los parámetros
-            stmt.setString(1, cubierta);
-            stmt.setInt(2, cabina);
-            stmt.setString(3, lado);
+            stmt.setInt(1, cabina);
+            stmt.setString(2, lado);
+            stmt.setString(3, cubierta);
 
-            // Ejecutar la consulta
-            ResultSet rs = stmt.executeQuery();
-
-            // Mostrar los resultados
+            rs  = stmt.executeQuery();
 
 
+            while (rs.next()) {
+                String name = rs.getString("nombre"); // Podemos acceder por nombre...
+                int age = rs.getInt("edad"); // ... y por índice
+                System.out.println("Nombre = " + name + "; Edad = " + age);
+            }
+
+            rs.close();
 
 
         } catch (SQLException ex) {
             System.err.println("Error al obtener la lista de pasajeros: " + ex.getMessage());
+        } finally {
+            // Liberar recursos
+            if (rs != null) {
+                rs.close();
+            }
+            if (stmt != null) {
+                stmt.close();
+            }
         }
 
         
