@@ -109,7 +109,6 @@ public class Main {
                 System.out.println("Nombre = " + name + "; Edad = " + age);
             }
 
-            rs.close();
 
 
         } catch (SQLException ex) {
