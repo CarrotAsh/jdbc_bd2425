@@ -1,6 +1,11 @@
 package bbdd;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class Main {
 
@@ -13,51 +18,58 @@ public class Main {
     private static Connection conn;
 
     public static void main(String[] args) throws Exception {
-
-        //Ejercicios
-
         Class.forName("com.mysql.cj.jdbc.Driver");
 
         String url = "jdbc:mysql://" + DB_SERVER + ":" + DB_PORT + "/" + DB_NAME;
         conn = DriverManager.getConnection(url, DB_USER, DB_PASS);
 
-        // @TODO Prueba sus funciones
-        // 1. Añade los planetas a la base de datos
-        //nuevoPlaneta("Kepler-186f", 3.3e24, 8800, "Copernico");
-        //nuevoPlaneta("HD 209458 b", 1.4e27, 100000, "Beta Pictoris");
-        //nuevoPlaneta("LHS 1140 b", 8.3e24, 8800, "Copernico");
-        // 2. Muestra por pantalla la lista de pasajeros de la cabina A-60-S
-        listaPasajerosCabina("A",60,"S");
-        // 3. Muestra por pantalla una lista de sistemas, planetas y número de pasajeros con origen en ellos
-        listaOrigenes();
+        try{
+            // @TODO Prueba sus funciones
+            // 1. Añade los planetas a la base de datos
+            nuevoPlaneta("Kepler-186f", 3.3e24, 8800, "Copernico");
+            nuevoPlaneta("HD 209458 b", 1.4e27, 100000, "Beta Pictoris");
+            nuevoPlaneta("LHS 1140 b", 8.3e24, 8800, "Copernico");
+
+            // 2. Muestra por pantalla la lista de pasajeros de la cabina A-60-S
+            listaPasajerosCabina("A",60,"S");
+
+            // 3. Muestra por pantalla una lista de sistemas, planetas y número de pasajeros con origen en ellos
+            listaOrigenes();
+        }catch (SQLException ex){
+            System.err.println("Error en la base de datos: " + ex.getMessage());
+        }
         conn.close();
     }
 
     private static void nuevoPlaneta (String nombre, double masa, int radio, String sistema) throws SQLException {
         // @TODO Añade planetas a la base de datos
+        PreparedStatement stmt = null;
         try{
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO planetas (nombre, masa, radio, sistema) VALUES (?,?,?,?)");
+            stmt = conn.prepareStatement("INSERT INTO planetas (nombre, masa, radio, sistema) VALUES (?,?,?,?)");
             stmt.setString(1, nombre);
-            if (Double.isNaN(masa)) { //Double.isNaN()
-                stmt.setNull(2, java.sql.Types.DECIMAL); // Si masa es nulo, insertar NULL (si no se hace asi salta nullPointerException)
+            if (Double.isNaN(masa)) {
+                stmt.setNull(2, java.sql.Types.DECIMAL);
             } else {
-                stmt.setDouble(2, masa); // Si no, insertar el valor de masa
+                stmt.setDouble(2, masa);
             }
             if (radio < 0) {
-                stmt.setNull(3, java.sql.Types.DECIMAL);  // lo mismo que pasaba con la masa
+                stmt.setNull(3, java.sql.Types.DECIMAL);
             } else {
-                stmt.setInt(3, radio);  //
+                stmt.setInt(3, radio);
             }
             stmt.setString(4,sistema);
             stmt.executeUpdate();
             System.out.println("Creado el planeta \""+ nombre + "\"");
-            stmt.close();
         } catch(SQLException ex){
             if (ex.getMessage().contains("Duplicate entry"))
                 System.out.println("Ya existe el planeta en la BBDD. No es necesario crearlo");
             else
             {
                 System.out.println(ex);
+            }
+        }finally {
+            if(stmt != null){
+                stmt.close();
             }
         }
     }
@@ -67,7 +79,6 @@ public class Main {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            // Consulta SQL para obtener pasajeros de una cabina específica
             stmt = conn.prepareStatement("SELECT p.nombre, p.edad " +
                     "FROM pasajeros p " +
                     "WHERE numero_cabina = ? AND lado_cabina = ? AND cubierta = ?");
@@ -76,14 +87,13 @@ public class Main {
             stmt.setString(3, cubierta);
             rs  = stmt.executeQuery();
             while (rs.next()) {
-                String name = rs.getString("nombre"); // Podemos acceder por nombre...
-                int age = rs.getInt("edad"); // ... y por índice
+                String name = rs.getString("nombre");
+                int age = rs.getInt("edad");
                 System.out.println("Nombre = " + name + "; Edad = " + age);
             }
         } catch (SQLException ex) {
             System.err.println("Error al obtener la lista de pasajeros: " + ex.getMessage());
         } finally {
-            // Liberar recursos
             if (rs != null) {
                 rs.close();
             }
@@ -117,7 +127,7 @@ public class Main {
                 int pasajeros = rs.getInt("pasajeros");
                 System.out.println("Sistema = " + sistema + "; planeta = " + planeta + "; Num-Pasajeros = " + pasajeros );
             }
-        } catch (SQLException ex) {
+        }catch (SQLException ex) {
             System.err.println("Error al obtener la lista de origenes: " + ex.getMessage());
         }finally {
             if(stmt != null){
@@ -129,80 +139,3 @@ public class Main {
         }
     }
 }
-
-/*
-
-private static void listaPasajerosCabina (String cubierta, int cabina, String lado) throws SQLException {
-        // @TODO Muestra por pantalla una lista de pasajeros de una cabina
-        List<pasajero> lista= new ArrayList<>();
-        PreparedStatement stmt;
-        stmt = conn.prepareStatement("SELECT p.nombre, p.edad " + "FROM pasajeros p " + "WHERE numero_cabina = ? AND lado_cabina = ? AND cubierta = ?");
-        stmt.setInt(1, cabina);
-        stmt.setString(2, lado);
-        stmt.setString(3, cubierta);
-        ResultSet rs = stmt.executeQuery();
-
-        while(rs.next()){
-
-            lista.add(new Pasajero(rs.getString("nombre"), rs.getInt("edad")));
-            //lista.add(rs.getPasajero());
-        }
-        rs.close();
-        System.out.println("------lista de pasajeros------");
-        for(Pasajero i: lista) {
-            System.out.println("Nombre:" + " " + i.getName()+" "+"Edad:" + " "+ i.getEdad());
-        }
-        System.out.println();
-
-}
-
-
-private static void listaOrigenes() throws SQLException {
-    // @TODO Muestra por pantalla una lista de planetas, sistemas y número de pasajeros provinientes de ellos
-    List<Origenes> lista = new ArrayList<>();
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-
-    try {
-        stmt = conn.prepareStatement(
-                "SELECT " +
-                        "    pl.sistema, " +
-                        "    pl.nombre AS planeta, " +
-                        "    COUNT(p.id) AS pasajeros " +
-                        "FROM " +
-                        "    planetas pl " +
-                        "LEFT JOIN " +
-                        "    pasajeros p ON p.planeta_natal = pl.nombre AND p.sistema_natal = pl.sistema " +
-                        "GROUP BY " +
-                        "    pl.sistema, " +
-                        "    pl.nombre;");
-
-        rs = stmt.executeQuery();
-
-        while (rs.next()) {
-            lista.add(new Origenes(rs.getString("sistema"), rs.getString("planeta"), rs.getInt("pasajeros")));
-        }
-
-        for (Origenes i : lista) {
-            System.out.println("Sistema: " + i.getSistema() + ", Planeta: " + i.getPlaneta() + ", Pasajeros: " + i.getPasajeros());
-        }
-
-        System.out.println();
-
-    } catch (SQLException ex) {
-        System.err.println("Error al obtener la lista de origenes: " + ex.getMessage());
-    } finally {
-        if (stmt != null) {
-            stmt.close();
-        }
-        if (rs != null) {
-            rs.close();
-        }
-    }
-}
-
-
-
-
- */
-
